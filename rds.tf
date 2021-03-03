@@ -45,7 +45,7 @@ resource "aws_db_instance" "postgre" {
   instance_class       = "db.t3.medium"
   name                 = "mydb"
   username             = "sergio"
-  password             = "$Winterf3l"
+  password             = "secret"
   multi_az             = true
   parameter_group_name = var.parameter_group
   skip_final_snapshot  = true
