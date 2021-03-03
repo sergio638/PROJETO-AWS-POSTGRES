@@ -35,6 +35,21 @@ data "aws_iam_policy_document" "rds_enhanced_monitoring" {
   }
 }
 
+resource "aws_db_parameter_group" "default" {
+  name   = "rds-pg"
+  family = "postgres12.5"
+
+  parameter {
+    name  = "log_statement"
+    value = "all"
+  }
+
+  parameter {
+    name  = "log_min_duration_statement"
+    value = "1"
+  }
+}
+
 # DB Master
 
 resource "aws_db_instance" "postgre" {
