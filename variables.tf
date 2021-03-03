@@ -4,11 +4,11 @@ variable "region"{
  }
 
  variable "access_key"{ 
-    default = "AKIATGHD5TSAZLGJVPPM"
+    default = "secret"
 }
 
  variable "secret_key"{ 
-    default = "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"
+    default = "secret"
  }
 
  variable "cidr_block"{ 
