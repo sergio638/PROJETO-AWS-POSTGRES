@@ -83,3 +83,14 @@ variable "key_pair" {
    default = "sergio"
 
 }
+
+variable "protocol" {
+  type        = string
+  description = "Digite o protocolo correspondente ao endpoint"
+}
+
+variable "endpoint" {
+  
+  type        = string
+  description = "Digite o endpoint desejado"
+}
