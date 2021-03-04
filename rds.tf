@@ -35,9 +35,13 @@ data "aws_iam_policy_document" "rds_enhanced_monitoring" {
   }
 }
 
+/*Parameter group utilizado enviar os dados DDL e DML para os logs do RDS. Quando o log_statement estiver 
+com o valor "ddl" enviará os dados ddl. Quando for "mod" enviará os dados de dml. Quando estiver em "all"
+enviará ambos.*/
+
 resource "aws_db_parameter_group" "default" {
-  name   = "rds-pg"
-  family = "postgres12.5"
+  name   = "default"
+  family = "postgres12"
 
   parameter {
     name  = "log_statement"
@@ -48,6 +52,36 @@ resource "aws_db_parameter_group" "default" {
     name  = "log_min_duration_statement"
     value = "1"
   }
+}
+
+#Metric Filter que identifica a Pattern "DELETE"
+
+resource "aws_cloudwatch_log_metric_filter" "postgresql" {
+  name           = "MyAppAccessCount"
+  pattern        = "DELETE"
+  log_group_name = aws_cloudwatch_log_group.postgresql.name
+
+  metric_transformation {
+    name      = "IncomingLogEvents"
+    namespace = "Logs"
+    value     = "1"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "postgresql" {
+  name = "postgresql"
+}
+
+#Sns_topic
+resource "aws_sns_topic" "sns_postgres" {
+  name = "sns_postgres"
+}
+
+#Sns_topic_subscription
+resource "aws_sns_topic_subscription" "sns_postgres_subs" {
+  topic_arn = "arn:aws:sns:us-east-1:219521326209:Default_CloudWatch_Alarms_Topic"
+  protocol  = var.protocol
+  endpoint  = var.endpoint
 }
 
 # DB Master
@@ -159,4 +193,20 @@ resource "aws_cloudwatch_metric_alarm" "database_disk_free" {
     DBInstanceIdentifier = aws_db_instance.postgre.id
   } 
 }  
+  
+#Ddl e dml no postgres
+
+resource "aws_cloudwatch_metric_alarm" "postgres_dmleddl" {
+  alarm_name          = "postgres_dmleddl"
+  alarm_description   = "postgres_dmleddl"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  namespace           = "Logs"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "1"
+  metric_name = "IncomingLogEvents"
+  actions_enabled     = "true"
+  alarm_actions       = [aws_sns_topic.sns_postgres.arn]
+}
 
